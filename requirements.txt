@@ -2,4 +2,3 @@ fastapi
 selenium
 webdriver-manager
 uvicorn
-os
