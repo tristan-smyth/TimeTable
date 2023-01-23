@@ -127,21 +127,3 @@ def get_driver(department: int=8,student_group: int=13,delay=0, debug=False):
         time.sleep(delay)
 
     return monday_lst,tuesday_lst,wednesday_lst,thursday_lst,friday_lst
-
-
-a,b,c,d,e = get_driver(department=6,student_group=3)
-
-for i in a:
-    print(i)
-
-for i in b:
-    print(i)
-
-for i in c:
-    print(i)
-
-for i in d:
-    print(i)
-
-for i in e:
-    print(i)
