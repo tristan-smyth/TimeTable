@@ -1,25 +1,40 @@
 from fastapi import FastAPI
-
-app = FastAPI()
-
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import time
+import traceback
+from fastapi import FastAPI
+from fastapi.requests import Request
+from fastapi.responses import JSONResponse
+import os
+
+async def catch_exceptions_middleware(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception as e:
+        err = traceback.format_exception(type(e), e, e.__traceback__)
+        return JSONResponse(content={"traceback": err}, status_code=500)
+
+
+app = FastAPI()
+app.middleware('http')(catch_exceptions_middleware)
 
 @app.get("/")
 def home():
     return {"Test"}
 
 @app.get("/data/{department}/{student_group}")
-def get_driver(department: int=8,student_group: int=13,delay=0, debug=False):
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')  # Last I checked this was necessary.
+def get_driver(department: int=8,student_group: int=13):
+    
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
 
-    # Creates a new driver instance
-    driver = webdriver.Chrome(ChromeDriverManager().install(),chrome_options=options)
     driver.get("https://timetables.dkit.ie/studentset.php")
 
     time.sleep(0.5)
@@ -107,23 +122,5 @@ def get_driver(department: int=8,student_group: int=13,delay=0, debug=False):
         for item in tr:
             friday_lst[row].append(item.text)
 
-    if debug:
-        for i in monday_lst:
-            print(i)
-        print("\n")
-        for i in tuesday_lst:
-            print(i)
-        print("\n")
-        for i in wednesday_lst:
-            print(i)
-        print("\n")
-        for i in thursday_lst:
-            print(i)
-        print("\n")
-        for i in friday_lst:
-            print(i)
-
-    if delay > 0:
-        time.sleep(delay)
 
     return monday_lst,tuesday_lst,wednesday_lst,thursday_lst,friday_lst
