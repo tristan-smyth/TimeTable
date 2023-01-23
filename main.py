@@ -8,7 +8,6 @@ import traceback
 from fastapi import FastAPI
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
-import os
 
 async def catch_exceptions_middleware(request: Request, call_next):
     try:
@@ -33,7 +32,7 @@ def get_driver(department: int=8,student_group: int=13):
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
-    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), options=chrome_options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
 
     driver.get("https://timetables.dkit.ie/studentset.php")
 
